@@ -1,10 +1,9 @@
 ﻿using MediatR;
 
-namespace SATS.Business.Commands
+namespace SATS.Business.Commands.Students
 {
-    public class UpdateStudentCommand : IRequest
+    public class CreateStudentCommand : IRequest<int>
     {
-        public int StudentId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime BirthDate { get; set; }

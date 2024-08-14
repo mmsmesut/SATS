@@ -1,22 +1,17 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SATS.Business.Commands;
-using SATS.Business.Queries;
+using SATS.Business.Commands.Students;
+using SATS.Business.Queries.Students;
 
 namespace SATS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentController : ControllerBase
+    public class StudentController : SatsBaseController
     {
-
-        private readonly ISender _mediator;
-
-        public StudentController(ISender mediator)
+        public StudentController(ISender mediator) : base(mediator)
         {
-            _mediator = mediator;
         }
-
 
         [HttpPost]
         public async Task<IActionResult> CreateStudent(CreateStudentCommand command)

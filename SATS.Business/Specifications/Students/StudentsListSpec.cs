@@ -1,7 +1,7 @@
 ﻿using Ardalis.Specification;
 using SATS.Data.Entities;
 
-namespace SATS.Business.Specifications
+namespace SATS.Business.Specifications.Students
 {
     public class StudentsListSpec : Specification<Student>
     {

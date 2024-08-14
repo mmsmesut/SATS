@@ -1,10 +1,10 @@
 ﻿using MediatR;
-using SATS.Business.Queries;
+using SATS.Business.Queries.Students;
 using SATS.Business.Repositories.Interfaces;
 using SATS.Business.Specifications;
 using SATS.Data.Entities;
 
-namespace SATS.Business.Handlers
+namespace SATS.Business.Handlers.Students
 {
     public class GetStudentByIdQueryHandler : IRequestHandler<GetStudentByIdQuery, Student>
     {

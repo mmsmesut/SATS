@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SATS.Business.Handlers;
+using SATS.Business.Handlers.Student;
 using SATS.Business.Repositories;
 using SATS.Business.Repositories.Interfaces;
 using SATS.Data;

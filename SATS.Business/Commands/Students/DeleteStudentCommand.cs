@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace SATS.Business.Commands
+namespace SATS.Business.Commands.Students
 {
     public class DeleteStudentCommand : IRequest
     {

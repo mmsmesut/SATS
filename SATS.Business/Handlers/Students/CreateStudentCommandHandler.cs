@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using SATS.Business.Commands;
+using SATS.Business.Commands.Students;
 using SATS.Business.Repositories.Interfaces;
 using SATS.Data.Entities;
 
-namespace SATS.Business.Handlers
+namespace SATS.Business.Handlers.Students
 {
 
     public class CreateStudentCommandHandler : IRequestHandler<CreateStudentCommand, int>
