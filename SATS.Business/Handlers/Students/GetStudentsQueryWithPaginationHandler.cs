@@ -4,34 +4,26 @@ using SATS.Business.DTOs;
 using SATS.Business.Queries.Students;
 using SATS.Business.Repositories.Interfaces;
 using SATS.Business.Specifications.Students;
+
 namespace SATS.Business.Handlers.Students
 {
-    public class GetStudentsQueryHandler : IRequestHandler<GetStudentListQuery, List<StudentDto>>
+    internal class GetStudentsQueryWithPaginationHandler : IRequestHandler<GetStudentListWithPaginationQuery, List<StudentDto>>
     {
-
         private readonly IStudentRepository _repository;
         private readonly IMapper _mapper;
 
-        public GetStudentsQueryHandler(IStudentRepository repository, IMapper mapper)
+        public GetStudentsQueryWithPaginationHandler(IStudentRepository repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
         }
 
-        public async Task<List<StudentDto>> Handle(GetStudentListQuery request, CancellationToken cancellationToken)
+        public async Task<List<StudentDto>> Handle(GetStudentListWithPaginationQuery request, CancellationToken cancellationToken)
         {
-            var spec = new StudentsListSpec();
+            int skip = (request.PageNumber - 1) * request.PageSize;
+            var spec = new StudentsListWithPaginationSpec(skip, request.PageSize);
             var students = await _repository.ListAsync(spec, cancellationToken);
             return _mapper.Map<List<StudentDto>>(students);
-
         }
     }
 }
-
-
-//Handler 
-/*
-  handler : IRequestHandler<QueryRequest,Response>
-  GetStudentsQueryHandler : IRequestHandler<GetStudentsQuery, List<Student>>
- 
- */

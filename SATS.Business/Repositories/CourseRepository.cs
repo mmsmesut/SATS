@@ -12,4 +12,5 @@ namespace SATS.Business.Repositories
         {
         }
     }
+
 }

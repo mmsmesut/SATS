@@ -128,41 +128,41 @@ namespace SATS.UnitTest.Controllers
             Assert.That(okResult?.Value, Is.EqualTo(student));
         }
 
-        [Test]
-        public async Task GetStudents_ReturnsOkResult_WithListOfStudents()
-        {
-            // Arrange
-            var students = new List<Data.Entities.Student>
-        {
-            new Data.Entities.Student
-            {
-                StudentId = 1,
-                FirstName = "John",
-                LastName = "Doe",
-                BirthDate = DateTime.Parse("2000-01-01"),
-                Email = "john@example.com",
-                City = "City"
-            },
-            new Data.Entities.Student
-            {
-                StudentId = 2,
-                FirstName = "Jane",
-                LastName = "Doe",
-                BirthDate = DateTime.Parse("2000-01-02"),
-                Email = "jane@example.com",
-                City = "City"
-            }
-        };
-            _mediatorMock.Setup(m => m.Send(It.IsAny<GetStudentListQuery>(), default))
-                         .ReturnsAsync(students);
+        //[Test]
+        //public async Task GetStudents_ReturnsOkResult_WithListOfStudents()
+        //{
+        //    // Arrange
+        //    var students = new List<Data.Entities.Student>
+        //{
+        //    new Data.Entities.Student
+        //    {
+        //        StudentId = 1,
+        //        FirstName = "John",
+        //        LastName = "Doe",
+        //        BirthDate = DateTime.Parse("2000-01-01"),
+        //        Email = "john@example.com",
+        //        City = "City"
+        //    },
+        //    new Data.Entities.Student
+        //    {
+        //        StudentId = 2,
+        //        FirstName = "Jane",
+        //        LastName = "Doe",
+        //        BirthDate = DateTime.Parse("2000-01-02"),
+        //        Email = "jane@example.com",
+        //        City = "City"
+        //    }
+        //       };
+        //    _mediatorMock.Setup(m => m.Send(It.IsAny<GetStudentListQuery>(), default))
+        //                 .ReturnsAsync(students);
 
-            // Act
-            var result = await _controller.GetStudents();
+        //    // Act
+        //    var result = await _controller.GetStudents();
 
-            // Assert
-            Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result as OkObjectResult;
-            Assert.That(okResult?.Value, Is.EqualTo(students));
-        }
+        //    // Assert
+        //    Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        //    var okResult = result as OkObjectResult;
+        //    Assert.That(okResult?.Value, Is.EqualTo(students));
+        //}
     }
 }

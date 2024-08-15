@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using SATS.Business.Queries.Students;
 using SATS.Business.Repositories.Interfaces;
-using SATS.Business.Specifications;
+using SATS.Business.Specifications.Students;
 using SATS.Data.Entities;
 
 namespace SATS.Business.Handlers.Students

@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using SATS.Data.Entities;
+using SATS.Business.DTOs;
 namespace SATS.Business.Queries.Students
 {
-    public class GetStudentListQuery : IRequest<List<Student>>
+    public class GetStudentListQuery : IRequest<List<StudentDto>>
     {
     }
 }

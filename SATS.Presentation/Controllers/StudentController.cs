@@ -53,5 +53,14 @@ namespace SATS.Presentation.Controllers
             var students = await _mediator.Send(new GetStudentListQuery());
             return Ok(students);
         }
+
+        [HttpGet]
+        [Route("StudentsPaginations")]
+        public async Task<IActionResult> GetStudents([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        {
+            var query = new GetStudentListWithPaginationQuery { PageNumber = 1, PageSize = 10 };
+            var students = await _mediator.Send(query);
+            return Ok(students);
+        }
     }
 }
