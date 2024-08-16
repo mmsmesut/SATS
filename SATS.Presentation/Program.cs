@@ -1,13 +1,12 @@
-using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SATS.Business.Consumers;
 using SATS.Business.Mappings;
 using SATS.Business.Repositories;
 using SATS.Business.Repositories.Interfaces;
 using SATS.Core;
 using SATS.Data;
+using SATS.Presentation.Infrustructore.MassTransit;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -131,24 +130,25 @@ builder.Services.AddHttpContextAccessor();
 
 
 
-// RabbitMQ ve MassTransit konfigürasyonu
-builder.Services.AddMassTransit(x =>
-{
-    x.AddConsumer<StudentConsumer>();
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host("localhost", "/", h =>
-        {
-            h.Username("guest");
-            h.Password("guest");
-        });
+//// RabbitMQ ve MassTransit konfigürasyonu
+//builder.Services.AddMassTransit(x =>
+//{
+//    x.AddConsumer<StudentConsumer>();
+//    x.UsingRabbitMq((context, cfg) =>
+//    {
+//        cfg.Host("localhost", "/", h =>
+//        {
+//            h.Username("guest");
+//            h.Password("guest");
+//        });
 
-        cfg.ConfigureEndpoints(context);
-    });
-});
-builder.Services.AddMassTransitHostedService();
+//        cfg.ConfigureEndpoints(context);
+//    });
+//});
+//builder.Services.AddMassTransitHostedService();
 
-
+// MassTransit yapýlandýrmasýný ekleyin
+builder.Services.AddMassTransitConfiguration(builder.Configuration);
 
 
 var app = builder.Build();
