@@ -94,19 +94,20 @@ builder.Services.AddAuthorization();
 
 
 // Swagger servisini ekleyin ve JWT Authorization için yapýlandýrýn
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddSwaggerGen(options => // AddSwaggerGen: (API belgeleri oluþturma aracý) yapýlandýrmak için kullanýlýr
 {
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme //Bu metod, Swagger'da güvenlik þemasýný (JWT) nasýl tanýmlayacaðýnýzý yapýlandýrýr. Her bir parça þunlarý yapar:
     {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Name = "Authorization", //Bu, kimlik doðrulama için kullanýlacak baþlýðýn adýný belirtir.
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,//Bu, güvenlik þemasýnýn HTTP tabanlý olduðunu belirtir
+        Scheme = "Bearer", // Bu, kullanýlan kimlik doðrulama þemasýnýn Bearer token þemasý olduðunu belirtir. Yani, token'lar HTTP baþlýðýnda gönderilecektir.
+        BearerFormat = "JWT",//Bu, Bearer token'ýnýn JWT formatýnda olduðunu belirtir.
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header, // Bu, token'ýn HTTP baþlýðýnda gönderilmesi gerektiðini belirtir. Query string veya diðer yerlerde gönderilmez.
         Description = "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\""
+        // Swagger UI'deki giriþ alaný için bir açýklama saðlar. Kullanýcýlara JWT token'larýný Bearer <token> formatýnda girmeleri gerektiðini söyler. Örneðin, token 12345abcdef ise, Bearer 12345abcdef þeklinde girilmelidir
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement//API uç noktalarý için hangi güvenlik þemalarýnýn gerektiðini belirtir. JWT token'ýnýn gerekli olduðunu belirtmek için kullanýlýr.
     {
         {
             new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -122,6 +123,9 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+//get claims->payload info 
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
