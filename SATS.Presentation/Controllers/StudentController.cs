@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SATS.Business.Commands.Students;
 using SATS.Business.Queries.Students;
@@ -7,6 +8,7 @@ namespace SATS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class StudentController : SatsBaseController
     {
         public StudentController(ISender mediator) : base(mediator)

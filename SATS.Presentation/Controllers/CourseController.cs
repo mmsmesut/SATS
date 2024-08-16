@@ -7,6 +7,7 @@ namespace SATS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class CourseController : SatsBaseController
     {
         public CourseController(ISender mediator) : base(mediator)

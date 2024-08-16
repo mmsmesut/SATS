@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SATS.Business.Mappings;
 using SATS.Business.Repositories;
 using SATS.Business.Repositories.Interfaces;
+using SATS.Core;
 using SATS.Data;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,65 +17,111 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-try
+builder.Services.AddAutoMapper(typeof(StudentProfile).Assembly);
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPagedListQueryHandler<StudentDto, Student>>());
+
+builder.Services.AddTransient<IStudentRepository, StudentRepository>();
+builder.Services.AddTransient<ICourseRepository, CourseRepository>();
+
+// MediatR configuration
+var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+    .Where(assembly => assembly.FullName.Contains("SATS.Business"))
+    .ToArray();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies));
+
+#region MyRegion
+//Mediator
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateStudentCommandHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DeleteStudentCommandHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateStudentCommandHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetStudentsQueryHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetStudentByIdQueryHandler).Assembly));
+
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateCourseCommandHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DeleteCourseCommandHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetCourseByIdQueryHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateCourseCommandHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
+// Register generic repository for other entities if needed
+
+#endregion
+
+//Db
+builder.Services.AddDbContext<SATSAppDbContext>(options =>
+options.UseNpgsql(@"Host=localhost;Database=localdb;Username=postgres;Password=mms;Search Path=sats"));
+
+//ReferenceHandler.Preserve option in your JsonSerializerOptions to handle circular references. This tells the serializer to preserve object references, 
+builder.Services.AddControllers().AddJsonOptions(options =>
 {
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.WriteIndented = true; // Optional: for pretty print
+});
 
 
+builder.Services.AddScoped<TokenService>();
+
+// JWT Ayarlarýný `appsettings.json` dosyasýndan çekme
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"];
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
 
 
-    builder.Services.AddAutoMapper(typeof(StudentProfile).Assembly);
-
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPagedListQueryHandler<StudentDto, Student>>());
-
-
-    builder.Services.AddTransient<IStudentRepository, StudentRepository>();
-    builder.Services.AddTransient<ICourseRepository, CourseRepository>();
-
-    // MediatR configuration
-    var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-        .Where(assembly => assembly.FullName.Contains("SATS.Business"))
-        .ToArray();
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies));
-
-    //Mediator
-
-
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateStudentCommandHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DeleteStudentCommandHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateStudentCommandHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetStudentsQueryHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetStudentByIdQueryHandler).Assembly));
-
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateCourseCommandHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DeleteCourseCommandHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetCourseByIdQueryHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateCourseCommandHandler).Assembly));
-    //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-
-    // Register generic repository for other entities if needed
-
-
-    //Db
-    builder.Services.AddDbContext<SATSAppDbContext>(options =>
-    options.UseNpgsql(@"Host=localhost;Database=localdb;Username=postgres;Password=mms;Search Path=sats")
-);
-
-
-    //ReferenceHandler.Preserve option in your JsonSerializerOptions to handle circular references. This tells the serializer to preserve object references, 
-    builder.Services.AddControllers().AddJsonOptions(options =>
+// JWT Authentication'ý ekleme
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;//JWT taþýyýcý (Bearer) kimlik doðrulamasýný kullanýr.
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; //özelliði, kimlik doðrulama gerektiren durumlarda hangi þemanýn kullanýlacaðýný belirle
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.WriteIndented = true; // Optional: for pretty print
+        ValidateIssuer = true, //(Zorunlu Deðil): Token'daki issuer'ý (token'ý kim oluþturduysa) doðrular. Güvenliði saðlamak için genellikle true yapýlýr.
+        ValidateAudience = true,//(Zorunlu Deðil): Token'daki audience'ý (token'ýn hedef kitlesi) doðrular. Güvenliði artýrmak için genellikle true yapýlýr.
+        ValidateLifetime = true, //Token'ýn süresinin dolup dolmadýðýný kontrol eder. Token süresinin doðrulanmasýný saðlamak için genellikle true yapýlýr.
+        ValidateIssuerSigningKey = true,//Token'ý imzalamak için kullanýlan anahtarýn doðruluðunu kontrol eder. Güvenliði saðlamak için zorunludur.
+        ValidIssuer = issuer, //Token'ýn bu deðeri içermesi beklenir.
+        ValidAudience = audience, //Token'ýn bu deðeri içermesi beklenir.
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),//: Token'ýn imzalanmasýnda kullanýlan anahtar. Bu anahtar, token'ýn geçerli olup olmadýðýný doðrulamak için kullanýlýr.
+        ClockSkew = TimeSpan.FromMinutes(5)  // Token süresi dolduðunda bir miktar esneklik saðlar. Örneðin, 5 dakikalýk bir kayma toleransý, token süresi dolmuþ olsa bile bu süre içinde hala geçerli sayýlmasýný saðlar.
+    };
+});
+
+builder.Services.AddAuthorization();
+
+
+
+// Swagger servisini ekleyin ve JWT Authorization için yapýlandýrýn
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\""
     });
 
-}
-catch (AggregateException ex)
-{
-    foreach (var innerException in ex.InnerExceptions)
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
-        Console.WriteLine(innerException.Message);
-    }
-}
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 
 var app = builder.Build();
 
@@ -82,6 +132,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Middleware sýrasýna authentication ve authorization ekleme
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
+
+/*
+ Zorunluluk Durumu
+Zorunlu Olanlar:
+
+ValidateIssuerSigningKey: Token'ýn geçerli olup olmadýðýný doðrulamak için imza anahtarýnýn kontrol edilmesi zorunludur.
+IssuerSigningKey: Token'ýn imzalanmasýnda kullanýlan anahtar, doðrulama sürecinin ayrýlmaz bir parçasýdýr.
+Zorunlu Olmayanlar:
+
+ValidateIssuer, ValidateAudience, ValidateLifetime: Bu doðrulamalar güvenliði artýrmak için önerilir, ancak zorunlu deðildir. Bu doðrulamalar, token'ýn belirli bir issuer, audience, veya belirli bir süre için geçerli olup olmadýðýný kontrol eder. Eðer uygulamanýz bu tür doðrulamalara ihtiyaç duymuyorsa, bu seçenekleri devre dýþý býrakabilirsiniz.
+ */
