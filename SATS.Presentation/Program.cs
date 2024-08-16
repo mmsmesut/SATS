@@ -1,6 +1,8 @@
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SATS.Business.Consumers;
 using SATS.Business.Mappings;
 using SATS.Business.Repositories;
 using SATS.Business.Repositories.Interfaces;
@@ -126,6 +128,28 @@ builder.Services.AddSwaggerGen(options => // AddSwaggerGen: (API belgeleri oluþt
 
 //get claims->payload info 
 builder.Services.AddHttpContextAccessor();
+
+
+
+// RabbitMQ ve MassTransit konfigürasyonu
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<StudentConsumer>();
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
+builder.Services.AddMassTransitHostedService();
+
+
+
 
 var app = builder.Build();
 
