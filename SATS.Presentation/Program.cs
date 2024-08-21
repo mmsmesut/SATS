@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SATS.Business.Mappings;
@@ -52,6 +53,11 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies
 builder.Services.AddDbContext<SATSAppDbContext>(options =>
 options.UseNpgsql(@"Host=localhost;Database=localdb;Username=postgres;Password=mms;Search Path=sats"));
 
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<SATSAppDbContext>()
+    .AddDefaultTokenProviders();
+
+
 //ReferenceHandler.Preserve option in your JsonSerializerOptions to handle circular references. This tells the serializer to preserve object references, 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -92,6 +98,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
 // Swagger servisini ekleyin ve JWT Authorization için yapýlandýrýn
